@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <body>
+        <canvas id="water-level-chart" height="200px" width="400px"></canvas>
+        <center>
+        <div class="title">
+          <h1 class="til">Water Level Data</h1>
+          <table>
+            <tr>
+              <td class="datas">
+                  <table class="tableData">
+                    <tr>
+                      <td><h3>Water value:</h3></td>
+                      <td><h3 id="data-list"></h3></td>
+                    </tr>
+                    <tr>
+                      <td><h3>Water level:</h3></td>
+                      <td><h3 id="Data-level"></h3></td>
+                    </tr>
+                    <tr>
+                      <td><h3>Date:</h3></td>
+                      <td><h3 id="Date-list"></h3></td>
+                    </tr>
+                  </table>
+            </tr>
+          </table>
+        </div>
+        </center>
+       
+      
+      </body>
+      <script>
+        const socket = io();
+      
+        const chartData = {
+          labels: [],     // x-axis labels (received times)
+          values: [],     // y-axis values (water values)
+        };
+      
+        const ctx = document.getElementById('water-level-chart').getContext('2d');
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: chartData.labels,
+            datasets: [{
+              label: 'Water Level',
+              data: chartData.values,
+              borderColor: 'blue',
+              fill: false
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Water Level Value'
+                }
+              }
+            }
+          }
+        });
+      
+        socket.on('serialData', (data) => {
+          const dataList = document.getElementById('data-list');
+          const dateList = document.getElementById('Date-list');
+          dataList.textContent = ${data.message};
+          dateList.textContent = data.receivedTime;
+      
+          const level = parseInt(data.message);
+      
+          if (level == 0) {
+            let Datalevel = document.getElementById("Data-level").textContent = "low";
+          } else if (level >= 150 && level <= 250) {
+            let Datalevel = document.getElementById("Data-level").textContent = "medium";
+          } else if (level >= 251) {
+            let Datalevel = document.getElementById("Data-level").textContent = "high";
+          }
+      
+          // Update the chart data
+          chartData.labels.push(data.receivedTime);
+          chartData.values.push(level);
+      
+          // Update the chart
+          chart.update();
+        });
+        
+        socket.on('disconnect', () => {
+          console.log('Disconnected from server');
+        });
+      </script>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>History</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #110133;
+    color: #fff;
+}
+
+.con {
+    display: flex;
+    position: absolute;
+    top: 10%;
+    left: 15%;
+    width: fit-content;
+    height: fit-content;
+    background-color: rgba(255, 255, 255, 0.13);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 00 10px rgba(8, 7, 16, 0.6);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px;
+}
+
+tr,th,td {
+    border-radius: 3px;
+    font-size: 20px;
+}
+
+th {
+    width: 2in;
+    background-color: rgba(255, 255, 255, 0.13);
+}
+
+td {
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 0;
+}
+
+.background .shape,
+.shape1 {
+    height: 200px;
+    position: absolute;
+    width: 200px;
+    border-radius: 50%;
+}
+
+.shape1 {
+    background: linear-gradient(to top, #692517, #f0c119);
+    right: 300px;
+    top: 70px;
+}
+
+.shape {
+    background: linear-gradient(to right, #ff512f, #f09819);
+    left: 300px;
+    bottom: 70px;
+
+}
+</style>
+</head>
+
+<body>
+<div class="background">
+<div class="shape1"></div>
+<div class="shape"></div>
+</div>
+<div class="con">
+<center>
+    <h1>History</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Access</th>
+                <th>UID</th>
+                <th>Temperature</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+        <tbody id="dataRows">
+        </tbody>
+
+    </table>
+</center>
+</div>
+<script>
+fetch('/getdata')
+    .then(response => response.json())
+    .then(data => {
+        dataRows.innerHTML = '';
+        data.forEach(row => {
+            const rowHTML = `<tr>
+<td>${row.id}</td>
+<td>${row.access}</td>
+<td>${row.uid}</td>
+<td>${row.temp}</td>
+<td>${row.datetime}</td>
+</tr>`;
+            dataRows.insertAdjacentHTML('beforeend', rowHTML);
+        });
+    });
+
+</script>
+</body>
+
+</html>

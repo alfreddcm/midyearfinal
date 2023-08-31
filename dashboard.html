@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>CyberRFID - Secure Access Dashboard</title>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<style>
+body {
+margin: 0;
+font-family: 'Roboto', sans-serif;
+background-color: #110133;
+color: #fff;
+}
+
+.container {
+width: 620px;
+height: fit-content;
+background-color: rgba(255, 255, 255, 0.13);
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+border: 2px solid rgba(255, 255, 255, 0.1);
+box-shadow: 00 10px rgba(8, 7, 16, 0.6);
+padding: 30px 35px;
+border-radius: 10px;
+}
+
+.header {
+text-align: center;
+margin-bottom: 3px;
+}
+
+.title {
+font-size: 2.5rem;
+margin: 10px;
+}
+
+.status-section {
+color: white;
+font-size: 20px;
+display: block;
+flex-direction: column;
+padding: 10px;
+
+}
+
+.status-card {
+margin: 10px;
+background-color: rgba(255, 255, 255, 0.1);
+padding: 5px;
+border-radius: 10px;
+box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.status {
+color: #fff;
+}
+
+.background .shape,
+.shape1 {
+height: 200px;
+position: absolute;
+width: 200px;
+border-radius: 50%;
+}
+
+.shape1 {
+background: linear-gradient(to top, #692517, #f0c119);
+left: 300px;
+top: 70px;
+}
+
+.shape {
+background: linear-gradient(to right, #ff512f, #f09819);
+right: 300px;
+bottom: 70px;
+}
+</style>
+
+<body onload="startTime()">
+<div class="background">
+<div class="shape1"></div>
+<div class="shape"></div>
+</div>
+<div class="container" id="body">
+<header class="header">
+    <h1 class="title">Dashboard</h1>
+    <h4> Today is: <span id="txt"></span></h4>
+</header>
+<div class="con">
+    <section class="status-section">
+    <div class="status-card">
+        <p class="status"><strong>Status:</strong>
+            <span id="scanvalue">Waiting for a card</span>
+        </p>
+    </div>
+    <div class="status-card">
+        <p class="status"><strong>Access:</strong> <span id="accValue">Waiting</span></p>
+    </div>
+    <div class="status-card">
+        <p class="status"><strong>RFID UID:</strong> <span id="idno">-</span></p>
+    </div>
+    <div class="status-card">
+        <p class="status"><strong>Temperature:</strong> <span id="temp">-</span></p>
+    </div>
+    </section>
+</div>
+</div>
+
+<script>
+const currentDate = new Date();
+let ifscan = 0;
+let acc = '';
+let id = '';
+let temp = '';
+const socket = io();
+
+document.getElementById('scanvalue').innerText = 'Waiting for a card';
+function resetData() {
+    ifscan = 0;
+    acc = 2;
+    id = '';
+    temp = '';
+    updateElements();
+}
+socket.on('updateData', (data) => {
+    ifscan = data.card;
+    acc = data.acc;
+    id = data.id;
+    temp = data.temperature;
+    updateElements();
+});
+
+function updateDateTime() {
+    const now = new Date();
+    const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    const formattedDateTime = now.toLocaleDateString('en-US', options).replace(',', '');
+    document.getElementById('datetime').innerText = formattedDateTime;
+}
+
+function updateElements() {
+    if (ifscan == 1) {
+        document.getElementById('scanvalue').innerText = 'Card scanned';
+    } else if (ifscan == 0) {
+        document.getElementById('scanvalue').innerText = 'Waiting for a card';
+    }
+    if (acc === "Granted") {
+        document.getElementById('accValue').innerText = "Acces Granted";
+        document.getElementById('body').style.backgroundColor = "green";
+    } else if (acc === "Denied") {
+        document.getElementById('accValue').innerText = "Access Denied";
+        document.getElementById('body').style.backgroundColor = "red";
+    } else {
+        document.getElementById('accValue').innerText = "Waiting for a card";
+    }
+    document.getElementById('idno').innerText = id;
+    document.getElementById('temp').innerText = temp + ' C';
+
+    setTimeout(() => {
+        document.getElementById('body').style.backgroundColor = "";
+        resetData();
+    }, 5000);
+}
+
+function startTime() {
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+    const today = new Date();
+    let h = today.getHours();
+    let m = today.getMinutes();
+    let s = today.getSeconds();
+    let dayOfWeek = daysOfWeek[today.getDay()];
+    let day = today.getDate();
+    let month = today.getMonth() + 1;
+    let year = today.getFullYear();
+
+    m = checkTime(m);
+    s = checkTime(s);
+
+    document.getElementById('txt').innerHTML = h + ":" + m + ":" + s + " " + dayOfWeek + ", " + day + "/" + month + "/" + year;
+    setTimeout(startTime, 1000);
+}
+
+function checkTime(i) {
+    if (i < 10) { i = "0" + i }; 
+    return i;
+}
+</script>
+</body>
+
+</html>
